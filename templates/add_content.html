@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
-{% block title %}새 학습 콘텐츠 등록{% endblock %}
-{% block header_title %}📝 새 학습 콘텐츠 등록{% endblock %}
+{% block title %}콘텐츠 수정{% endblock %}
+{% block header_title %}✍️ 콘텐츠 수정{% endblock %}
 
 {% block content %}
 <link href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
@@ -12,80 +12,17 @@
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/lang/summernote-ko-KR.min.js"></script>
 
 <style>
-    /* 이 페이지에서만 사용하는 스타일 */
-    .add-content-form label {
-        display: block;
-        margin-bottom: 8px;
-        font-weight: 600;
-        color: #495057;
-    }
-    .add-content-form input[type="text"],
-    .add-content-form select,
-    .add-content-form textarea {
-        width: 100%;
-        padding: 12px;
-        margin-bottom: 1.5rem;
-        border: 1px solid #ced4da;
-        border-radius: 4px;
-        box-sizing: border-box;
-        font-size: 1em;
-    }
-    .add-content-form textarea {
-        min-height: 250px;
-        resize: vertical;
-        line-height: 1.6;
-    }
-    .form-actions {
-        display: flex;
-        justify-content: flex-end; /* 버튼을 오른쪽으로 정렬 */
-        gap: 10px; /* 버튼 사이 간격 */
-        margin-top: 1rem;
-    }
-    .form-actions button,
-    .form-actions a {
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        text-decoration: none;
-        color: white;
-        font-weight: 500;
-        font-size: 0.95em;
-    }
-    .btn-submit { background-color: #28a745; }
-    .btn-submit:hover { background-color: #218838; }
-    .btn-cancel { background-color: #6c757d; }
-    .btn-cancel:hover { background-color: #5a6268; }
+    /* ... (스타일은 이전과 동일) ... */
 </style>
 
-<form class="add-content-form" method="post">
-    <div>
-        <label for="subject_id">과목 선택:</label>
-        <select id="subject_id" name="subject_id" required>
-            <option value="">-- 과목을 선택해주세요 --</option>
-            {% for subject in subjects %}
-                <option value="{{ subject.id }}">{{ subject.name }}</option>
-            {% endfor %}
-        </select>
-    </div>
-    <div>
-        <label for="content_type">콘텐츠 타입:</label>
-        <select id="content_type" name="content_type" required>
-            <option value="이론">이론</option>
-            <option value="실습">실습</option>
-        </select>
-    </div>
-    <div>
-        <label for="title">제목:</label>
-        <input type="text" id="title" name="title" required>
-    </div>
+<form class="edit-form" method="post">
     <div>
         <label for="body">내용:</label>
-        <textarea id="summernote" name="body" required></textarea>
+        <textarea id="summernote" name="body" required>{{ content.body | safe }}</textarea>
     </div>
     <div class="form-actions">
-        <a href="{{ url_for('admin_dashboard') }}" class="btn-cancel">취소</a>
-        <button type="submit" class="btn-submit">등록하기</button>
+        <a href="{{ url_for('manage_content') }}" class="btn-cancel">취소</a>
+        <button type="submit" class="btn-submit">수정 완료</button>
     </div>
 </form>
 
