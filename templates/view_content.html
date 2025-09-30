@@ -66,8 +66,8 @@
             <iframe src="{{ url_for('static', filename=content.pdf_path) }}" class="pdf-viewer">
                 <p>브라우저가 PDF를 지원하지 않습니다. <a href="{{ url_for('static', filename=content.pdf_path) }}">여기서 PDF를 다운로드하세요.</a></p>
             </iframe>
-        {% elif content.storage_type == 'editor' and content.body %}
-            <div class="content-body">
+        {% elif content.body %}
+             <div class="content-body">
                 {{ content.body | safe }}
             </div>
         {% else %}

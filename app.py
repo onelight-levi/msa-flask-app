@@ -173,9 +173,11 @@ def manage_content():
         if conn:
             conn.close()
 
+# app.py
+
 @app.route('/admin/edit_content/<int:content_id>', methods=['GET', 'POST'])
 def edit_content(content_id):
-    """기존 학습 콘텐츠를 수정하는 페이지 (PDF 업로드 기능 추가)"""
+    """기존 학습 콘텐츠를 수정하는 페이지 (최종 수정안)"""
     if not is_admin():
         flash('접근 권한이 없습니다.', 'error')
         return redirect(url_for('index'))
@@ -190,38 +192,30 @@ def edit_content(content_id):
                 content_type = request.form.get('content_type')
                 title = request.form.get('title', '').strip()
 
-                body = None
-                pdf_path = None
-
                 if storage_type == 'editor':
                     body = request.form.get('body', '').strip()
-                    sql = "UPDATE contents SET subject_id=%s, content_type=%s, storage_type=%s, title=%s, body=%s, pdf_path=NULL WHERE id=%s"
-                    cursor.execute(sql, (subject_id, content_type, storage_type, title, body, content_id))
+                    sql = "UPDATE contents SET subject_id=%s, content_type=%s, storage_type='editor', title=%s, body=%s, pdf_path=NULL WHERE id=%s"
+                    cursor.execute(sql, (subject_id, content_type, title, body, content_id))
 
                 elif storage_type == 'pdf':
-                    # 새 PDF 파일이 업로드되었는지 확인
+                    pdf_path_updated = False
                     if 'pdf_file' in request.files and request.files['pdf_file'].filename != '':
                         file = request.files['pdf_file']
                         if file and allowed_pdf_file(file.filename):
-                            # 기존 파일 삭제 로직 (선택 사항)
-                            # cursor.execute("SELECT pdf_path FROM contents WHERE id=%s", (content_id,))
-                            # old_file = cursor.fetchone()
-                            # if old_file and old_file['pdf_path']:
-                            #     os.remove(os.path.join(app.root_path, 'static', old_file['pdf_path']))
-
                             filename = secure_filename(file.filename)
                             unique_filename = f"{uuid.uuid4()}_{filename}"
                             save_path = os.path.join(app.root_path, 'static/pdfs', unique_filename)
                             file.save(save_path)
                             pdf_path = f"pdfs/{unique_filename}"
-                            sql = "UPDATE contents SET subject_id=%s, content_type=%s, storage_type=%s, title=%s, body=NULL, pdf_path=%s WHERE id=%s"
-                            cursor.execute(sql, (subject_id, content_type, storage_type, title, pdf_path, content_id))
+                            sql = "UPDATE contents SET subject_id=%s, content_type=%s, storage_type='pdf', title=%s, body=NULL, pdf_path=%s WHERE id=%s"
+                            cursor.execute(sql, (subject_id, content_type, title, pdf_path, content_id))
+                            pdf_path_updated = True
                         else:
                             flash('PDF 파일만 업로드할 수 있습니다.', 'error')
-                            # 오류 시 페이지를 다시 로드하기 위해 아래 GET 로직으로 넘어감
-                    else: # 새 PDF 파일이 없으면 기존 정보만 업데이트
-                        sql = "UPDATE contents SET subject_id=%s, content_type=%s, storage_type=%s, title=%s WHERE id=%s"
-                        cursor.execute(sql, (subject_id, content_type, storage_type, title, content_id))
+
+                    if not pdf_path_updated: # 새 파일이 업로드되지 않은 경우
+                        sql = "UPDATE contents SET subject_id=%s, content_type=%s, storage_type='pdf', title=%s WHERE id=%s"
+                        cursor.execute(sql, (subject_id, content_type, title, content_id))
 
                 conn.commit()
                 flash('콘텐츠가 성공적으로 수정되었습니다.', 'success')
