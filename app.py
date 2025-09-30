@@ -1069,13 +1069,12 @@ def view_content(content_id):
         return redirect(url_for('index'))
 
     conn = None
-    content = None
-    subject_id_for_redirect = None # 리디렉션을 위한 변수
     try:
         conn = get_db_connection()
         with conn.cursor() as cursor:
             sql = """
-                SELECT c.id, c.title, c.body, c.content_type, c.created_at, c.subject_id, c.is_active, s.name as subject_name
+                SELECT c.id, c.title, c.body, c.content_type, c.storage_type,
+                       c.pdf_path, c.created_at, c.is_active, s.name as subject_name, c.subject_id
                 FROM contents c
                 JOIN subjects s ON c.subject_id = s.id
                 WHERE c.id = %s
@@ -1087,27 +1086,21 @@ def view_content(content_id):
                 flash('존재하지 않는 콘텐츠입니다.', 'error')
                 return redirect(url_for('study_list'))
 
-            subject_id_for_redirect = content['subject_id']
+            # ★★★ 수정된 최종 접근 제어 로직 ★★★
+            # 관리자가 아닌 경우에만, 비활성 콘텐츠 접근을 차단합니다.
+            if not is_admin() and not content['is_active']:
+                flash('아직 활성화되지 않은 콘텐츠입니다.', 'error')
+                return redirect(url_for('subject_detail', subject_id=content['subject_id']))
 
-            # 접근 제어 로직
-            # is_active가 False(0)이면 접근을 차단합니다.
-            # 관리자(kevin, kwangjin)는 비활성 상태에서도 접근 가능합니다.
-            if not content['is_active'] and session.get('username') not in ['kevin', 'kwangjin']:
-                flash('아직 활성화되지 않은 콘텐츠입니다. 관리자에게 문의하세요.', 'error')
-                return redirect(url_for('subject_detail', subject_id=subject_id_for_redirect))
+            return render_template('view_content.html', content=content)
 
     except Exception as e:
-        print(f"데이터베이스 오류 (콘텐츠 조회): {e}")
-        flash('콘텐츠를 불러오는 데 실패했습니다.', 'error')
-        if subject_id_for_redirect:
-            return redirect(url_for('subject_detail', subject_id=subject_id_for_redirect))
-        else:
-            return redirect(url_for('study_list'))
+        app.logger.error(f"Failed to view content: {e}", exc_info=True)
+        flash('콘텐츠를 불러오는 중 오류가 발생했습니다.', 'error')
+        return redirect(url_for('study_list'))
     finally:
         if conn:
             conn.close()
-
-    return render_template('view_content.html', content=content, username=session['username'])
 
 @app.route('/content/toggle_status/<int:content_id>', methods=['POST'])
 def toggle_content_status(content_id):
