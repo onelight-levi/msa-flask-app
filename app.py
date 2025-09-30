@@ -1185,6 +1185,7 @@ def add_content():
         conn = get_db_connection()
         with conn.cursor() as cursor:
             if request.method == 'POST':
+                # ★★★ 수정된 부분: 모든 form 값을 .get()으로 안전하게 받도록 변경 ★★★
                 storage_type = request.form.get('storage_type')
                 subject_id = request.form.get('subject_id')
                 content_type = request.form.get('content_type')
@@ -1193,12 +1194,16 @@ def add_content():
                 body = None
                 pdf_path = None
 
-                if storage_type == 'editor':
+                # 폼 데이터 유효성 검사 강화
+                if not all([storage_type, subject_id, content_type, title]):
+                    flash('저장 방식, 과목, 타입, 제목은 필수 항목입니다.', 'error')
+
+                elif storage_type == 'editor':
                     body = request.form.get('body', '').strip()
-                    if not all([subject_id, content_type, title, body]):
-                        flash('모든 필드를 채워주세요.', 'error')
+                    if not body:
+                        flash('에디터 내용을 입력해주세요.', 'error')
                     else:
-                        sql = "INSERT INTO contents (subject_id, content_type, storage_type, title, body) VALUES (%s, %s, %s, %s, %s)"
+                        sql = "INSERT INTO contents (subject_id, content_type, storage_type, title, body, pdf_path) VALUES (%s, %s, %s, %s, %s, NULL)"
                         cursor.execute(sql, (subject_id, content_type, storage_type, title, body))
                         conn.commit()
                         flash('새로운 콘텐츠가 성공적으로 등록되었습니다.', 'success')
@@ -1216,7 +1221,7 @@ def add_content():
                             file.save(save_path)
                             pdf_path = f"pdfs/{unique_filename}"
 
-                            sql = "INSERT INTO contents (subject_id, content_type, storage_type, title, pdf_path) VALUES (%s, %s, %s, %s, %s)"
+                            sql = "INSERT INTO contents (subject_id, content_type, storage_type, title, body, pdf_path) VALUES (%s, %s, %s, %s, NULL, %s)"
                             cursor.execute(sql, (subject_id, content_type, storage_type, title, pdf_path))
                             conn.commit()
                             flash('PDF 콘텐츠가 성공적으로 등록되었습니다.', 'success')
