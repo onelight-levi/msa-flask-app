@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: auth
-          image: nginx:latest
+          image: onelight01/svc-auth:placeholder
           ports:
             - containerPort: 5000
 ---
@@ -36,7 +36,7 @@ spec:
     spec:
       containers:
         - name: board
-          image: nginx:latest
+          image: onelight01/svc-board:placeholder
           ports:
             - containerPort: 5000
 ---
@@ -57,7 +57,7 @@ spec:
     spec:
       containers:
         - name: mypage
-          image: nginx:latest
+          image: onelight01/svc-mypage:placeholder
           ports:
             - containerPort: 5000
 ---
@@ -78,7 +78,7 @@ spec:
     spec:
       containers:
         - name: study
-          image: nginx:latest
+          image: onelight01/svc-study:placeholder
           ports:
             - containerPort: 5000
 ---
@@ -99,7 +99,7 @@ spec:
     spec:
       containers:
         - name: admin
-          image: nginx:latest
+          image: onelight01/svc-admin:placeholder
           ports:
             - containerPort: 5000
 ---
