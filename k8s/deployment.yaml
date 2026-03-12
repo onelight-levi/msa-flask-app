@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: deploy-auth
+  namespace: msa-flask-app
 spec:
   replicas: 3
   selector:
@@ -22,6 +23,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: deploy-board 
+  namespace: msa-flask-app
 spec:
   replicas: 3
   selector:
@@ -42,6 +44,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: deploy-mypage
+  namespace: msa-flask-app
 spec:
   replicas: 3
   selector:
@@ -62,6 +65,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: deploy-study
+  namespace: msa-flask-app
 spec:
   replicas: 3
   selector:
@@ -82,6 +86,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: deploy-admin
+  namespace: msa-flask-app
 spec:
   replicas: 3
   selector:
@@ -102,6 +107,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: svc-auth
+  namespace: msa-flask-app
 spec:
   type: ClusterIP
   selector:
@@ -114,6 +120,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: svc-board
+  namespace: msa-flask-app
 spec:
   type: ClusterIP
   selector:
@@ -126,6 +133,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: svc-mypage
+  namespace: msa-flask-app
 spec:
   type: ClusterIP
   selector:
@@ -138,6 +146,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: svc-study
+  namespace: msa-flask-app
 spec:
   type: ClusterIP
   selector:
@@ -150,6 +159,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: svc-admin
+  namespace: msa-flask-app
 spec:
   type: ClusterIP
   selector:
