@@ -109,7 +109,7 @@ metadata:
   name: svc-auth
   namespace: msa-flask-app
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   selector:
     app: auth
   ports:
