@@ -1,82 +1,50 @@
--- 10.10.8.4
-sudo -i
-apt update
-apt install mariadb-server mariadb-client -y
+# cicd training
 
--- 50-server.conf 파일 수정
-sudo vi /etc/mysql/mariadb.conf.d/50-server.cnf
-bind-address = 0.0.0.0
+## 원본
+https://github.com/worldvit/your_flask_app.git
 
-systemctl restart mariadb
+## 실습 방식
+Monolithic으로 구현된 웹 서비스를 기능별로 나눠 service와 pod를 나누는 MSA 방식으로 리팩토링하고 git action과 AWS를 이용해 CI/CD를 구현하는 것을 목표로 한다.
 
-sudo mysql -u root -p
-CREATE DATABASE flask_auth_db;
-CREATE USER 'flask_user'@'10.0.8.3' IDENTIFIED BY 'P@ssw0rd';
-GRANT ALL PRIVILEGES ON flask_auth_db.* TO 'flask_user'@'10.0.8.3';
-FLUSH PRIVILEGES;
+## 구조도
 
--- users 테이블 생성
-USE flask_auth_db;
+[ 클라이언트 (웹 브라우저) ]
+          │ (HTTP 요청: GET/POST)
+          ▼
+┌──────────────────────────────────────────────────────────┐
+│             Flask 애플리케이션 (app.py)                   │
+├──────────────────────────────────────────────────────────┤
+│  1. 인증 및 사용자 관리 (Auth)                             │
+│     - 로그인, 회원가입, 비밀번호 재설정 [cite: 151, 159, 160]    │
+│                                                          │
+│  2. 커뮤니티 게시판 (Board)                                  │
+│     - 게시글 작성/수정/삭제, 검색, 댓글 관리 [cite: 162, 170]    │
+│                                                          │
+│  3. 개인화 도구 (Personal Tools)                           │
+│     - 일기장 (달력 기반 기록) [cite: 172, 174]               │
+│     - To-Do 리스트 (할 일 관리, 마감일 재조정) [cite: 176, 184] │
+│                                                          │
+│  4. 학습 컨텐츠 (Study)                                     │
+│     - 과목별 이론/실습 컨텐츠 조회 [cite: 189, 191]             │
+│                                                          │
+│  5. 관리자 전용 (Admin)                                     │
+│     - 학습 컨텐츠 관리, 이미지/PDF 업로드 [cite: 154, 155]       │
+└──────────────┬───────────────────────────┬───────────────┘
+               │                           │
+      [ 헬퍼 함수 ]                 [ 템플릿 엔진 ]
+      - 권한 확인 (is_admin)        - Jinja2 HTML 파일들
+      - 보안 (해싱, 유효성 검사)    - 플래시 메시지 처리
+                         [cite: 151, 152]
+               │                           │
+               └─────────────┬─────────────┘
+                             ▼
+              ┌─────────────────────────────┐
+              │   MySQL 데이터베이스 (DB)    │
+              ├─────────────────────────────┤
+              │ - users / board / comments  │
+              │ - diaries / todos           │
+              │ - subjects / contents       │
+              └─────────────────────────────┘
 
-CREATE TABLE users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+## microservice로 묶기
 
--- board 테이블 생성
-USE flask_auth_db;
-
-CREATE TABLE board (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    title VARCHAR(255) NOT NULL,
-    content TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-
--- comments 테이블 생성
-CREATE TABLE comments (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    board_id INT NOT NULL,
-    user_id INT NOT NULL,
-    content TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (board_id) REFERENCES board(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-
-EXIT;
-
-
--- 10.10.8.3
-sudo apt update
-
-sudo apt install apache2 libapache2-mod-wsgi-py3
-sudo a2enmod wsgi
-
-sudo apt install python3.12 python3.12-venv python3.12-dev # Install Python 3.12 and development headers
-
-cd /var/www/html/
-sudo git clone https://github.com/worldvit/your_flask_app.git
-
-sudo chown -R www-data: /var/www/html/your_flask_app
-
-cd /etc/apache2/sites-enabled/
-sudo rm /etc/apache2/sites-enabled/000-default.conf
-
-cd /etc/apache2/sites-available
-
-cat<<EOF>flask_auth.conf
-WSGIPythonHome /var/www/html/your_flask_app/venv
-WSGIPythonPath /var/www/html/your_flask_app
-
-<VirtualHost *:80>
-    ServerName 10.10.8.3
-    ServerAdmin webmaster@localhost
-    WSGIScriptAlias / /va기
-truncate -s 0 /var/log/apache2/flask_auth_error.log
-tail -n 100 /var/log/apache2/flask_auth_error.log
