@@ -1,3 +1,20 @@
+import os
+import re
+from datetime import datetime, timedelta
+import calendar
+from dotenv import load_dotenv, find_dotenv
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify,send_from_directory
+from werkzeug.security import generate_password_hash, check_password_hash
+import pymysql.cursors
+import uuid
+from werkzeug.utils import secure_filename
+
+dotenv_path = find_dotenv('/var/www/html/your_flask_app/.env')
+if os.path.exists(dotenv_path):
+    load_dotenv(dotenv_path)
+
+app = Flask(__name__)
+
 @app.route('/study')
 def study_list():
     """전체 학습 과목 목록을 표시합니다."""
