@@ -1,0 +1,97 @@
+<!--
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>학습 과목 목록</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
+        .container { max-width: 900px; margin: 40px auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; margin-bottom: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .logout-link { font-size: 0.9em; text-align: right; }
+        .message { padding: 10px; margin-bottom: 15px; border-radius: 4px; text-align: center; }
+        .error { background-color: #f2dede; color: #a94442; border: 1px solid #ebccd1; }
+        .subject-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+        .subject-card { border: 1px solid #ddd; border-radius: 8px; padding: 20px; text-align: center; background-color: #f9f9f9; transition: transform 0.2s, box-shadow 0.2s; }
+        .subject-card:hover { transform: translateY(-5px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .subject-card a { text-decoration: none; color: #007bff; font-weight: bold; font-size: 1.1em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>학습 과목 목록</h2>
+            <div class="logout-link">
+                <p>환영합니다, {{ username }}님! | <a href="/">메인으로</a> | <a href="/logout">로그아웃</a></p>
+            </div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="subject-grid">
+            {% if subjects %}
+                {% for subject in subjects %}
+                    <div class="subject-card">
+                        <a href="{{ url_for('subject_detail', subject_id=subject.id) }}">{{ subject.name }}</a>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>등록된 학습 과목이 없습니다.</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
+-->
+{% extends "base.html" %}
+
+{% block title %}학습 과목 목록{% endblock %}
+{% block header_title %}학습 과목 목록{% endblock %}
+
+{% block content %}
+<style>
+    /* 이 페이지에서만 사용하는 스타일 */
+    .subject-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+    }
+    .subject-card {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        background-color: #fff;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .subject-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.07);
+    }
+    .subject-card a {
+        display: block;
+        padding: 2rem 1rem;
+        text-align: center;
+        text-decoration: none;
+        color: #007bff;
+        font-weight: 500;
+        font-size: 1.1em;
+    }
+</style>
+
+<div class="subject-grid">
+    {% for subject in subjects %}
+        <div class="subject-card">
+            <a href="{{ url_for('subject_detail', subject_id=subject.id) }}">{{ subject.name }}</a>
+        </div>
+    {% else %}
+        <p style="text-align: center; color: #6c757d;">등록된 학습 과목이 없습니다.</p>
+    {% endfor %}
+</div>
+{% endblock %}

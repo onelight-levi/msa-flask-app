@@ -1,0 +1,110 @@
+<!--
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>과목 수정</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
+        .container { max-width: 600px; margin: 40px auto; padding: 30px; border: 1px solid #ddd; border-radius: 8px; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; }
+        form { margin-top: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; }
+        input[type="text"] { width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .form-actions { text-align: center; }
+        .btn { padding: 12px 25px; border: none; border-radius: 5px; color: white; cursor: pointer; text-decoration: none; font-size: 1em; }
+        .btn-submit { background-color: #007bff; }
+        .btn-cancel { background-color: #6c757d; margin-left: 10px; }
+        .message { padding: 10px; margin-bottom: 15px; border-radius: 4px; text-align: center; }
+        .error { background-color: #f2dede; color: #a94442; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>과목 이름 수정</h2>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="post">
+            <label for="name">과목 이름:</label>
+            <input type="text" id="name" name="name" value="{{ subject.name }}" required>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-submit">수정 완료</button>
+                <a href="{{ url_for('manage_subjects') }}" class="btn btn-cancel">취소</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
+-->
+{% extends "base.html" %}
+
+{% block title %}과목 수정{% endblock %}
+{% block header_title %}📚 과목 수정{% endblock %}
+
+{% block content %}
+<style>
+    /* 이 페이지에서만 사용하는 스타일 */
+    .edit-form label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #495057;
+    }
+    .edit-form input[type="text"] {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 1.5rem;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        box-sizing: border-box;
+        font-size: 1em;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+    .edit-form input[type="text"]:focus {
+        border-color: #80bdff;
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+    .form-actions {
+        display: flex;
+        justify-content: flex-end; /* 버튼을 오른쪽으로 정렬 */
+        gap: 10px; /* 버튼 사이 간격 */
+        margin-top: 1rem;
+    }
+    .form-actions button,
+    .form-actions a {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        text-decoration: none;
+        color: white;
+        font-weight: 500;
+        font-size: 0.95em;
+    }
+    .btn-submit { background-color: #007bff; }
+    .btn-submit:hover { background-color: #0056b3; }
+    .btn-cancel { background-color: #6c757d; }
+    .btn-cancel:hover { background-color: #5a6268; }
+</style>
+
+<div class="edit-form">
+    <form method="post">
+        <div>
+            <label for="name">과목 이름:</label>
+            <input type="text" id="name" name="name" value="{{ subject.name }}" required>
+        </div>
+        <div class="form-actions">
+            <a href="{{ url_for('manage_subjects') }}" class="btn-cancel">취소</a>
+            <button type="submit" class="btn-submit">수정 완료</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

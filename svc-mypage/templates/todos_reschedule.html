@@ -1,0 +1,268 @@
+<!--
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ todo_item.task }} 마감일 재조정</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
+        .container { max-width: 800px; margin: 40px auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; margin-bottom: 20px; }
+        .message { padding: 10px; margin-bottom: 15px; border-radius: 4px; text-align: center; }
+        .error { background-color: #f2dede; color: #a94442; border: 1px solid #ebccd1; }
+        .success { background-color: #dff0d8; color: #3c763d; border: 1px solid #d6e9c6; }
+        .calendar-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .calendar-nav h3 { margin: 0; }
+        .calendar-nav a { text-decoration: none; color: #007bff; font-weight: bold; padding: 5px 10px; border: 1px solid #007bff; border-radius: 5px; }
+        .calendar-nav a:hover { background-color: #e6f2ff; }
+        .calendar-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .calendar-table th, .calendar-table td { border: 1px solid #ddd; text-align: center; padding: 0; height: 80px; vertical-align: top; }
+        .calendar-table th { background-color: #f0f0f0; padding: 10px; }
+        .calendar-table td { background-color: #fff; position: relative; }
+        .calendar-table td.empty { background-color: #f9f9f9; color: #ccc; }
+        .calendar-table td.today { background-color: #e0f0ff; }
+        .calendar-table td a {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+            width: 100%;
+            text-decoration: none;
+            color: #333;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .calendar-table td a:hover {
+            background-color: #f0f8ff;
+        }
+        .day-number { font-size: 1.2em; font-weight: bold; display: block; text-align: left; }
+        .logout-link { font-size: 0.9em; text-align: right; margin-top: 10px; }
+
+        .todo-info { background-color: #e6ffe6; border: 1px solid #b3ffb3; padding: 10px; border-radius: 5px; margin-bottom: 20px; }
+        .todo-info p { margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>{{ username }}님의 마감일 재조정</h2>
+            <div class="logout-link">
+                <p>환영합니다, {{ username }}님! | <a href="/">메인으로</a> | <a href="/logout">로그아웃</a></p>
+            </div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {# To-Do 항목 정보 표시 #}
+        {% if todo_item %}
+        <div class="todo-info">
+            <p><strong>할 일:</strong> {{ todo_item.task }}</p>
+            <p><strong>현재 마감일:</strong> {{ todo_item.due_date if todo_item.due_date else '없음' }}</p>
+            <p><strong>현재 상태:</strong> {{ todo_item.status }}</p>
+        </div>
+        {% else %}
+        <p class="message error">재조정할 To-Do 항목을 찾을 수 없습니다.</p>
+        {% endif %}
+
+        <div class="calendar-nav">
+            <a href="{{ url_for('reschedule_todo_calendar', todo_id=todo_item.id, year=prev_year, month=prev_month) }}">이전 달</a>
+            <h3>{{ year }}년 {{ month }}월 ({{ month_name }})</h3>
+            <a href="{{ url_for('reschedule_todo_calendar', todo_id=todo_item.id, year=next_year, month=next_month) }}">다음 달</a>
+        </div>
+
+        <table class="calendar-table">
+            <thead>
+                <tr>
+                    <th>일</th>
+                    <th>월</th>
+                    <th>화</th>
+                    <th>수</th>
+                    <th>목</th>
+                    <th>금</th>
+                    <th>토</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for week in month_days %}
+                <tr>
+                    {% for day in week %}
+                        {% if day == 0 %}
+                            <td class="empty"></td> {# 빈 칸 처리 #}
+                        {% else %}
+                            {% set date_str = '%04d-%02d-%02d' % (year, month, day) %}
+                            <td>
+                                {# 날짜 칸 전체를 선택 가능한 폼으로 감쌈 #}
+                                <form action="{{ url_for('set_new_due_date', todo_id=todo_item.id) }}" method="post" style="height: 100%; width: 100%; display: flex; flex-direction: column; justify-content: space-between; padding: 10px; box-sizing: border-box;">
+                                    <input type="hidden" name="new_due_date" value="{{ date_str }}">
+                                    <button type="submit" style="background: none; border: none; padding: 0; margin: 0; width: 100%; height: 100%; text-align: left; cursor: pointer; color: inherit; font: inherit;">
+                                        <span class="day-number">{{ day }}</span>
+                                        {# 오늘 날짜 강조 (선택 사항) #}
+                                        {% if year == today.year and month == today.month and day == today.day %}
+                                            <span style="font-size: 0.7em; color: #007bff; font-weight: bold;">(오늘)</span>
+                                        {% endif %}
+                                    </button>
+                                </form>
+                            </td>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="{{ url_for('todos_list') }}" style="text-decoration: none; background-color: #6c757d; color: white; padding: 10px 20px; border-radius: 5px;">취소하고 목록으로 돌아가기</a>
+        </div>
+    </div>
+</body>
+</html>
+-->
+{% extends "base.html" %}
+
+{% block title %}마감일 재조정{% endblock %}
+{% block header_title %}🗓️ To-Do 마감일 재조정{% endblock %}
+
+{% block content %}
+<style>
+    /* 이 페이지에서만 사용하는 스타일 */
+    .todo-info {
+        background-color: #e9ecef;
+        border: 1px solid #ced4da;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }
+    .todo-info p { margin: 0.5rem 0; }
+
+    .calendar-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding: 0.5rem;
+    }
+    .calendar-nav h3 {
+        margin: 0;
+        font-size: 1.5em;
+        color: #343a40;
+    }
+    .calendar-nav a {
+        text-decoration: none;
+        color: #007bff;
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border: 1px solid #dee2e6;
+        border-radius: 0.3rem;
+        background-color: #fff;
+        transition: all 0.2s ease;
+    }
+    .calendar-nav a:hover {
+        background-color: #007bff;
+        color: white;
+        border-color: #007bff;
+    }
+
+    .calendar-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+        border: 1px solid #dee2e6;
+    }
+    .calendar-table th,
+    .calendar-table td {
+        border: 1px solid #dee2e6;
+        text-align: center;
+        padding: 0;
+        height: 80px;
+        vertical-align: middle;
+    }
+    .calendar-table th {
+        background-color: #f8f9fa;
+        padding: 10px;
+        font-weight: 600;
+    }
+    .calendar-table button {
+        width: 100%;
+        height: 100%;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 1.1em;
+        font-weight: 500;
+        color: #212529;
+        transition: background-color 0.2s ease;
+    }
+    .calendar-table td.today button {
+        background-color: rgba(0, 123, 255, 0.1);
+        border-radius: 4px;
+        font-weight: bold;
+    }
+    .calendar-table button:hover {
+        background-color: #007bff;
+        color: white;
+        border-radius: 4px;
+    }
+
+    .cancel-action {
+        text-align: center;
+        margin-top: 2rem;
+    }
+    .cancel-action a {
+        background-color: #6c757d;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: 500;
+    }
+</style>
+
+{% if todo_item %}
+<div class="todo-info">
+    <p><strong>할 일:</strong> {{ todo_item.task }}</p>
+    <p><strong>현재 마감일:</strong> {{ todo_item.due_date if todo_item.due_date else '없음' }}</p>
+</div>
+{% endif %}
+
+<div class="calendar-nav">
+    <a href="{{ url_for('reschedule_todo_calendar', todo_id=todo_item.id, year=prev_year, month=prev_month) }}">‹ 이전 달</a>
+    <h3>{{ year }}년 {{ month }}월</h3>
+    <a href="{{ url_for('reschedule_todo_calendar', todo_id=todo_item.id, year=next_year, month=next_month) }}">다음 달 ›</a>
+</div>
+
+<table class="calendar-table">
+    <thead>
+        <tr>
+            <th style="color: #dc3545;">일</th><th>월</th><th>화</th><th>수</th><th>목</th><th>금</th><th style="color: #007bff;">토</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for week in month_days %}
+        <tr>
+            {% for day in week %}
+                <td class="{% if year == today.year and month == today.month and day == today.day %}today{% endif %}">
+                {% if day != 0 %}
+                    {% set date_str = '%04d-%02d-%02d' % (year, month, day) %}
+                    <form action="{{ url_for('set_new_due_date', todo_id=todo_item.id) }}" method="post" style="height: 100%;">
+                        <input type="hidden" name="new_due_date" value="{{ date_str }}">
+                        <button type="submit">{{ day }}</button>
+                    </form>
+                {% endif %}
+                </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="cancel-action">
+    <a href="{{ url_for('todos_list') }}">취소하고 목록으로 돌아가기</a>
+</div>
+{% endblock %}
+

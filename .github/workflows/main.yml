@@ -1,0 +1,47 @@
+name: Flask-App GitOps Pipeline
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Docker Login
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Push
+        run: |
+          docker build -t onelight01/svc-auth:${{ github.sha }} ./svc-auth
+          docker push onelight01/svc-auth:${{ github.sha }}
+          docker build -t onelight01/svc-board:${{ github.sha }} ./svc-board
+          docker push onelight01/svc-board:${{ github.sha }}
+          docker build -t onelight01/svc-mypage:${{ github.sha }} ./svc-mypage
+          docker push onelight01/svc-mypage:${{ github.sha }}
+          docker build -t onelight01/svc-study:${{ github.sha }} ./svc-study
+          docker push onelight01/svc-study:${{ github.sha }}
+          docker build -t onelight01/svc-admin:${{ github.sha }} ./svc-admin
+          docker push onelight01/svc-admin:${{ github.sha }}
+
+      - name: Update Manifest and Push
+        run: |
+          sed -i "s|image: onelight01/svc-auth:.*|image: onelight01/svc-auth:${{ github.sha }}|g" ./k8s/deployment.yaml
+          sed -i "s|image: onelight01/svc-board:.*|image: onelight01/svc-board:${{ github.sha }}|g" ./k8s/deployment.yaml
+          sed -i "s|image: onelight01/svc-mypage:.*|image: onelight01/svc-mypage:${{ github.sha }}|g" ./k8s/deployment.yaml
+          sed -i "s|image: onelight01/svc-study:.*|image: onelight01/svc-study:${{ github.sha }}|g" ./k8s/deployment.yaml
+          sed -i "s|image: onelight01/svc-admin:.*|image: onelight01/svc-admin:${{ github.sha }}|g" ./k8s/deployment.yaml
+          git config --global user.email "bot@github.com"
+          git config --global user.name "github-actions[bot]"
+          git add deployment.yaml
+          git commit -m "chore: update image tag to ${{ github.sha }} [skip ci]"
+          git push

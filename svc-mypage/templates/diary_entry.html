@@ -1,0 +1,162 @@
+<!--
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ diary.entry_date_str if diary else date_str }} 일기</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
+        .container { max-width: 800px; margin: 40px auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; margin-bottom: 20px; }
+        .message { padding: 10px; margin-bottom: 15px; border-radius: 4px; text-align: center; }
+        .error { background-color: #f2dede; color: #a94442; border: 1px solid #ebccd1; }
+        .success { background-color: #dff0d8; color: #3c763d; border: 1px solid #d6e9c6; }
+        form label { display: block; margin-bottom: 5px; font-weight: bold; color: #555;}
+        form input[type="text"], form textarea {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        form textarea { min-height: 200px; resize: vertical; }
+        form button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        form button:hover { background-color: #0056b3; }
+        .back-link { display: block; text-align: center; margin-top: 20px; color: #007bff; text-decoration: none; font-weight: bold;}
+        .back-link:hover { text-decoration: underline; }
+
+        .diary-view-content {
+            border: 1px solid #eee;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            line-height: 1.6;
+            white-space: pre-wrap; /* 줄바꿈 유지 */
+        }
+        .diary-view-title { font-size: 1.8em; margin-bottom: 10px; color: #333; }
+        .diary-view-date { font-size: 0.9em; color: #777; margin-bottom: 15px; }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>{{ username }}님의 일기</h2>
+            <div class="logout-link">
+                <p>환영합니다, {{ username }}님! | <a href="/dashboard">대시보드</a> | <a href="/logout">로그아웃</a></p>
+            </div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <h3>{{ date_str }}의 일기</h3>
+
+        <form action="{{ url_for('diary_entry', date_str=date_str) }}" method="post">
+            <label for="title">제목 (선택 사항):</label>
+            <input type="text" id="title" name="title" value="{{ diary.title if diary else '' }}">
+
+            <label for="content">내용:</label>
+            <textarea id="content" name="content" required>{{ diary.content if diary else '' }}</textarea>
+
+            <button type="submit">일기 저장</button>
+        </form>
+
+        <a href="{{ url_for('diary_calendar', year=date_str[:4]|int, month=date_str[5:7]|int) }}" class="back-link">달력으로 돌아가기</a>
+    </div>
+</body>
+</html>
+-->
+{% extends "base.html" %}
+
+{% block title %}{{ date_str }} 일기{% endblock %}
+{% block header_title %}📝 {{ date_str }} 일기{% endblock %}
+
+{% block content %}
+<style>
+    /* 이 페이지에서만 사용하는 스타일 */
+    .diary-form label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #495057;
+    }
+    .diary-form input[type="text"],
+    .diary-form textarea {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 1.5rem;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        box-sizing: border-box;
+        font-size: 1em;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+    .diary-form input[type="text"]:focus,
+    .diary-form textarea:focus {
+        border-color: #80bdff;
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+    .diary-form textarea {
+        min-height: 350px;
+        resize: vertical;
+        line-height: 1.6;
+    }
+    .form-actions {
+        display: flex;
+        justify-content: flex-end; /* 버튼을 오른쪽으로 정렬 */
+        gap: 10px; /* 버튼 사이 간격 */
+        margin-top: 1rem;
+    }
+    .form-actions button,
+    .form-actions a {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        text-decoration: none;
+        color: white;
+        font-weight: 500;
+        font-size: 0.95em;
+    }
+    .btn-submit { background-color: #007bff; }
+    .btn-submit:hover { background-color: #0056b3; }
+    .btn-cancel { background-color: #6c757d; }
+    .btn-cancel:hover { background-color: #5a6268; }
+</style>
+
+<form class="diary-form" action="{{ url_for('diary_entry', date_str=date_str) }}" method="post">
+    <div>
+        <label for="title">제목 (선택 사항):</label>
+        <input type="text" id="title" name="title" value="{{ diary.title if diary else '' }}">
+    </div>
+    <div>
+        <label for="content">내용:</label>
+        <textarea id="content" name="content" required>{{ diary.content if diary else '' }}</textarea>
+    </div>
+
+    <div class="form-actions">
+        <a href="{{ url_for('diary_calendar', year=date_str[:4]|int, month=date_str[5:7]|int) }}" class="btn-cancel">달력으로 돌아가기</a>
+        <button type="submit" class="btn-submit">일기 저장</button>
+    </div>
+</form>
+{% endblock %}

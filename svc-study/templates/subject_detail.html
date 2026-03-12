@@ -1,0 +1,256 @@
+<!--
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ subject.name }} - 학습 콘텐츠</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
+        .container { max-width: 900px; margin: 40px auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .logout-link { font-size: 0.9em; text-align: right; }
+        h2 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+        .content-section { display: flex; flex-direction: column; gap: 30px; margin-top: 20px; }
+        .content-box { flex: 1; padding: 20px; border: 1px solid #eee; border-radius: 8px; background-color: #fdfdfd; }
+        .content-box h3 { margin-top: 0; color: #28a745; }
+        .content-list { list-style-type: none; padding: 0; }
+        .content-list li { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #ccc; padding: 10px 5px; }
+        .content-list li a { text-decoration: none; color: #333; }
+        .content-list li a:hover { color: #0056b3; }
+        .content-list li .inactive-link { color: #999; } /* 비활성 링크는 클릭 방지 css 제거 (어차피 a 태그가 아님) */
+        .back-link { display: inline-block; margin-top: 20px; color: #007bff; text-decoration: none; font-weight: bold;}
+        .message { padding: 10px; margin-bottom: 15px; border-radius: 4px; text-align: center; }
+        .success { background-color: #dff0d8; color: #3c763d; border: 1px solid #d6e9c6; }
+        .status { font-size: 0.8em; font-weight: bold; padding: 3px 8px; border-radius: 10px; color: white; margin-left: 10px; }
+        .status-active { background-color: #28a745; }
+        .status-inactive { background-color: #6c757d; }
+        .toggle-button { padding: 4px 10px; font-size: 0.8em; border: none; border-radius: 5px; color: white; cursor: pointer; }
+        .btn-activate { background-color: #007bff; }
+        .btn-deactivate { background-color: #dc3545; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>{{ subject.name }}</h2>
+            <div class="logout-link">
+                <p>환영합니다, {{ username }}님! | <a href="/">메인으로</a> | <a href="/logout">로그아웃</a></p>
+            </div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="content-section">
+            <div class="content-box">
+                <h3>이론 (Theory)</h3>
+                <ul class="content-list">
+                    {% for content in theory_contents %}
+                        <li>
+                            <div>
+                                {% if content.is_active or session.username in ['kevin', 'kwangjin'] %}
+                                    <a href="{{ url_for('view_content', content_id=content.id) }}">{{ content.title }}</a>
+                                {% else %}
+                                    <span class="inactive-link">{{ content.title }}</span>
+                                {% endif %}
+                                <span class="status {{ 'status-active' if content.is_active else 'status-inactive' }}">{{ '활성' if content.is_active else '비활성' }}</span>
+                            </div>
+                            {% if session.username in ['kevin', 'kwangjin'] %}
+                            <form action="{{ url_for('toggle_content_status', content_id=content.id) }}" method="post">
+                                {% if content.is_active %}
+                                    <button type="submit" class="toggle-button btn-deactivate">비활성화</button>
+                                {% else %}
+                                    <button type="submit" class="toggle-button btn-activate">활성화</button>
+                                {% endif %}
+                            </form>
+                            {% endif %}
+                        </li>
+                    {% else %}
+                        <li>등록된 이론 콘텐츠가 없습니다.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="content-box">
+                <h3>실습 (Lab)</h3>
+                <ul class="content-list">
+                    {% for content in lab_contents %}
+                    <li>
+                        <div>
+                            {% if content.is_active or session.username in ['kevin', 'kwangjin'] %}
+                                <a href="{{ url_for('view_content', content_id=content.id) }}">{{ content.title }}</a>
+                            {% else %}
+                                <span class="inactive-link">{{ content.title }}</span>
+                            {% endif %}
+                            <span class="status {{ 'status-active' if content.is_active else 'status-inactive' }}">{{ '활성' if content.is_active else '비활성' }}</span>
+                        </div>
+                        {% if session.username in ['kevin', 'kwangjin'] %}
+                        <form action="{{ url_for('toggle_content_status', content_id=content.id) }}" method="post">
+                            {% if content.is_active %}
+                                <button type="submit" class="toggle-button btn-deactivate">비활성화</button>
+                            {% else %}
+                                <button type="submit" class="toggle-button btn-activate">활성화</button>
+                            {% endif %}
+                        </form>
+                        {% endif %}
+                    </li>
+                    {% else %}
+                        <li>등록된 실습 콘텐츠가 없습니다.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <a href="{{ url_for('study_list') }}" class="back-link">&larr; 전체 과목 목록으로 돌아가기</a>
+    </div>
+</body>
+</html>
+-->
+{% extends "base.html" %}
+
+{% block title %}{{ subject.name }} - 학습 콘텐츠{% endblock %}
+{% block header_title %}{{ subject.name }}{% endblock %}
+
+{% block content %}
+<style>
+    /* 이 페이지에서만 사용하는 스타일 */
+    .content-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* 2개의 열을 동일한 너비로 */
+        gap: 2rem; /* 열 사이의 간격 */
+    }
+    .content-box {
+        background-color: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+    }
+    .content-box h3 {
+        margin-top: 0;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid #ced4da;
+        padding-bottom: 0.75rem;
+        font-size: 1.3em;
+    }
+    .content-list {
+        list-style-type: none;
+        padding: 0;
+    }
+    .content-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+    .content-item:last-child {
+        border-bottom: none;
+    }
+    .content-title a {
+        text-decoration: none;
+        color: #007bff;
+        font-weight: 500;
+    }
+    .content-title .inactive-link {
+        color: #6c757d;
+        font-weight: normal;
+    }
+    .status {
+        font-size: 0.75em;
+        font-weight: bold;
+        padding: 3px 8px;
+        border-radius: 10px;
+        color: white;
+        margin-left: 10px;
+    }
+    .status-active { background-color: #28a745; }
+    .status-inactive { background-color: #6c757d; }
+
+    .toggle-button {
+        padding: 4px 8px;
+        font-size: 0.8em;
+        border: none;
+        border-radius: 4px;
+        color: white;
+        cursor: pointer;
+    }
+    .btn-activate { background-color: #007bff; }
+    .btn-deactivate { background-color: #dc3545; }
+
+    .back-link {
+        display: inline-block;
+        margin-top: 2rem;
+        padding: 10px 20px;
+        border-radius: 5px;
+        background-color: #6c757d;
+        color: white;
+        text-decoration: none;
+        font-weight: 500;
+    }
+</style>
+
+<div class="content-section">
+    <div class="content-box">
+        <h3>이론 (Theory)</h3>
+        <ul class="content-list">
+            {% for content in theory_contents %}
+            <li class="content-item">
+                <div class="content-title">
+                    {% if content.is_active or session.username in ['kevin', 'kwangjin'] %}
+                        <a href="{{ url_for('view_content', content_id=content.id) }}">{{ content.title }}</a>
+                    {% else %}
+                        <span class="inactive-link">{{ content.title }}</span>
+                    {% endif %}
+                    <span class="status {{ 'status-active' if content.is_active else 'status-inactive' }}">{{ '활성' if content.is_active else '비활성' }}</span>
+                </div>
+                {% if session.username in ['kevin', 'kwangjin'] %}
+                <form action="{{ url_for('toggle_content_status', content_id=content.id) }}" method="post">
+                    {% if content.is_active %}
+                        <button type="submit" class="toggle-button btn-deactivate">비활성화</button>
+                    {% else %}
+                        <button type="submit" class="toggle-button btn-activate">활성화</button>
+                    {% endif %}
+                </form>
+                {% endif %}
+            </li>
+            {% else %}
+                <li>등록된 이론 콘텐츠가 없습니다.</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="content-box">
+        <h3>실습 (Lab)</h3>
+        <ul class="content-list">
+            {% for content in lab_contents %}
+            <li class="content-item">
+                <div class="content-title">
+                    {% if content.is_active or session.username in ['kevin', 'kwangjin'] %}
+                        <a href="{{ url_for('view_content', content_id=content.id) }}">{{ content.title }}</a>
+                    {% else %}
+                        <span class="inactive-link">{{ content.title }}</span>
+                    {% endif %}
+                    <span class="status {{ 'status-active' if content.is_active else 'status-inactive' }}">{{ '활성' if content.is_active else '비활성' }}</span>
+                </div>
+                {% if session.username in ['kevin', 'kwangjin'] %}
+                <form action="{{ url_for('toggle_content_status', content_id=content.id) }}" method="post">
+                    {% if content.is_active %}
+                        <button type="submit" class="toggle-button btn-deactivate">비활성화</button>
+                    {% else %}
+                        <button type="submit" class="toggle-button btn-activate">활성화</button>
+                    {% endif %}
+                </form>
+                {% endif %}
+            </li>
+            {% else %}
+                <li>등록된 실습 콘텐츠가 없습니다.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<a href="{{ url_for('study_list') }}" class="back-link">↩ 전체 과목 목록으로</a>
+{% endblock %}

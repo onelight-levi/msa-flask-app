@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}{{ content.title if content else '콘텐츠 보기' }}{% endblock %}
+{% block header_title %}학습 콘텐츠 보기{% endblock %}
+
+{% block content %}
+<style>
+    .content-title {
+        font-size: 2.5em;
+        font-weight: bold;
+        margin-top: 0;
+        margin-bottom: 0.5rem;
+        color: #212529;
+        line-height: 1.2;
+    }
+    .content-meta {
+        font-size: 0.9em;
+        color: #6c757d;
+        margin-bottom: 2rem;
+        border-bottom: 1px solid #e9ecef;
+        padding-bottom: 1rem;
+    }
+    .content-body {
+        font-size: 1.1em;
+        line-height: 1.7;
+        margin-bottom: 2.5rem;
+        white-space: pre-wrap;
+        color: #343a40;
+    }
+    .content-body ol, .content-body ul {
+        padding-left: 20px;
+    }
+    .content-body li {
+        margin-bottom: 0.5em;
+    }
+    /* ★★★ 추가된 부분 ★★★ */
+    .content-body li p {
+        margin: 0; /* li 태그 안의 p 태그 여백 제거 */
+    }
+
+    .back-link {
+        display: inline-block;
+        padding: 10px 20px;
+        border-radius: 5px;
+        background-color: #6c757d;
+        color: white;
+        text-decoration: none;
+        font-weight: 500;
+    }
+     .pdf-viewer {
+        width: 100%;
+        height: 800px; /* PDF 뷰어 높이 */
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+    }
+</style>
+
+<div>
+    {% if content %}
+        <h1 class="content-title">{{ content.title }}</h1>
+        <p class="content-meta">
+            <strong>과목:</strong> {{ content.subject_name }} | <strong>타입:</strong> {{ content.content_type }} | <strong>작성일:</strong> {{ content.created_at.strftime('%Y-%m-%d') }}
+        </p>
+
+        {% if content.storage_type == 'pdf' and content.pdf_path %}
+            <iframe src="{{ url_for('static', filename=content.pdf_path) }}" class="pdf-viewer">
+                <p>브라우저가 PDF를 지원하지 않습니다. <a href="{{ url_for('static', filename=content.pdf_path) }}">여기서 PDF를 다운로드하세요.</a></p>
+            </iframe>
+        {% elif content.body %}
+             <div class="content-body">
+                {{ content.body | safe }}
+            </div>
+        {% else %}
+            <p>표시할 콘텐츠가 없습니다.</p>
+        {% endif %}
+
+        <a href="{{ url_for('subject_detail', subject_id=content.subject_id) }}" class="back-link" style="margin-top: 2rem;">↩ {{ content.subject_name }} 목록으로 돌아가기</a>
+    {% else %}
+        <p>콘텐츠를 찾을 수 없습니다.</p>
+        <a href="{{ url_for('study_list') }}" class="back-link">↩ 전체 과목 목록으로 돌아가기</a>
+    {% endif %}
+</div>
+{% endblock %}

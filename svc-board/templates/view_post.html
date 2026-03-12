@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}{{ post.title }}{% endblock %}
+{% block header_title %}게시글 보기{% endblock %}
+
+{% block content %}
+<style>
+    /* 이 페이지에서만 사용하는 스타일 */
+    .post-title {
+        font-size: 2.5em;
+        font-weight: bold;
+        margin-top: 0;
+        margin-bottom: 0.5rem;
+        color: #212529;
+        line-height: 1.2;
+    }
+
+    .post-meta {
+        font-size: 0.9em;
+        color: #6c757d;
+        margin-bottom: 2rem;
+        border-bottom: 1px solid #e9ecef;
+        padding-bottom: 1rem;
+    }
+
+    .post-content {
+        font-size: 1.1em;
+        line-height: 1.7;
+        margin-bottom: 2.5rem;
+        white-space: pre-wrap; /* 줄바꿈 유지 */
+        color: #343a40;
+    }
+
+    .post-actions {
+        margin-bottom: 3rem;
+        display: flex;
+        gap: 10px; /* 버튼 사이 간격 */
+        align-items: center;
+    }
+
+    .btn {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        text-decoration: none;
+        border-radius: 0.3rem;
+        font-size: 0.9em;
+        font-weight: 500;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-edit { background-color: #007bff; color: white; }
+    .btn-delete { background-color: #dc3545; color: white; }
+    .btn-list { background-color: transparent; color: #6c757d; border: 1px solid #dee2e6; }
+
+    .btn-edit:hover { background-color: #0056b3; }
+    .btn-delete:hover { background-color: #c82333; }
+    .btn-list:hover { background-color: #f8f9fa; }
+
+    .comments-section {
+        margin-top: 2.5rem;
+        border-top: 1px solid #e9ecef;
+        padding-top: 2rem;
+    }
+
+    .comments-section h3 {
+        font-size: 1.5em;
+        margin-bottom: 1.5rem;
+        color: #343a40;
+    }
+    
+    .comment-item {
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 0.3rem;
+    }
+    
+    .comment-item p { margin: 0; }
+    .comment-meta { font-size: 0.8em; color: #6c757d; margin-top: 0.5rem; }
+
+    .comment-form textarea {
+        width: 100%;
+        min-height: 100px;
+        padding: 0.75rem;
+        margin-bottom: 0.75rem;
+        border: 1px solid #ced4da;
+        border-radius: 0.3rem;
+        box-sizing: border-box;
+        font-size: 1em;
+        line-height: 1.5;
+    }
+    .comment-form button {
+        background-color: #343a40;
+        color: white;
+        padding: 0.6rem 1.2rem;
+        border: none;
+        border-radius: 0.3rem;
+        cursor: pointer;
+        font-weight: 500;
+    }
+    .comment-form button:hover { background-color: #23272b; }
+</style>
+
+<div>
+    {% if post %}
+        <h1 class="post-title">{{ post.title }}</h1>
+        <p class="post-meta">
+            By <strong>{{ post.username }}</strong> on {{ post.created_at.strftime('%Y-%m-%d %H:%M') }}
+            {% if post.created_at != post.updated_at %}(Updated: {{ post.updated_at.strftime('%Y-%m-%d %H:%M') }}){% endif %}
+        </p>
+        
+        <div class="post-content">
+            {{ post.content }}
+        </div>
+
+        <div class="post-actions">
+            {% if session.id == post.user_id %}
+                <a href="{{ url_for('edit_post', post_id=post.id) }}" class="btn btn-edit">수정</a>
+                <form action="{{ url_for('delete_post', post_id=post.id) }}" method="post" onsubmit="return confirm('정말 이 글과 모든 댓글을 삭제하시겠습니까?');" style="display: inline;">
+                    <button type="submit" class="btn btn-delete">삭제</button>
+                </form>
+            {% endif %}
+            <a href="{{ url_for('board_list') }}" class="btn btn-list">목록으로</a>
+        </div>
+
+        <div class="comments-section">
+            <h3>Comments</h3>
+            {% for comment in comments %}
+                <div class="comment-item">
+                    <p>{{ comment.content }}</p>
+                    <p class="comment-meta">By <strong>{{ comment.username }}</strong> on {{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                </div>
+            {% else %}
+                <p>아직 댓글이 없습니다. 첫 댓글을 작성해보세요!</p>
+            {% endfor %}
+            
+            <div class="comment-form" style="margin-top: 2rem;">
+                <h3>댓글 남기기</h3>
+                <form action="{{ url_for('add_comment', post_id=post.id) }}" method="post">
+                    <textarea name="content" placeholder="따뜻한 댓글을 남겨주세요..." required></textarea>
+                    <button type="submit">등록</button>
+                </form>
+            </div>
+        </div>
+    {% else %}
+        <p class="message error">게시글을 찾을 수 없습니다.</p>
+    {% endif %}
+</div>
+{% endblock %}

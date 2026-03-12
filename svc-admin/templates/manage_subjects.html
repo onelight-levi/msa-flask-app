@@ -1,0 +1,156 @@
+<!--
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>과목 관리</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
+        .container { max-width: 800px; margin: 40px auto; padding: 30px; border: 1px solid #ddd; border-radius: 8px; background-color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; }
+        .message { padding: 10px; margin-bottom: 15px; border-radius: 4px; text-align: center; }
+        .error { background-color: #f2dede; color: #a94442; }
+        .success { background-color: #dff0d8; color: #3c763d; }
+        .add-form { padding: 20px; background-color: #f9f9f9; border: 1px solid #eee; border-radius: 8px; margin-bottom: 30px; display: flex; gap: 10px; align-items: center; }
+        .add-form input[type="text"] { flex-grow: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        .subject-list { list-style-type: none; padding: 0; }
+        .subject-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #eee; }
+        .subject-item:last-child { border-bottom: none; }
+        .btn { padding: 8px 15px; border: none; border-radius: 5px; color: white; cursor: pointer; text-decoration: none; font-size: 0.9em; }
+        .btn-submit { background-color: #28a745; }
+        .btn-edit { background-color: #007bff; }
+        .btn-delete { background-color: #dc3545; }
+        .back-link { display: block; text-align: center; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>📚 과목 관리</h2>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="post" class="add-form">
+            <input type="text" name="name" placeholder="새 과목 이름 입력..." required>
+            <button type="submit" class="btn btn-submit">새 과목 추가</button>
+        </form>
+
+        <ul class="subject-list">
+            {% for subject in subjects %}
+            <li class="subject-item">
+                <span>{{ subject.name }}</span>
+                <div>
+                    <a href="{{ url_for('edit_subject', subject_id=subject.id) }}" class="btn btn-edit">수정</a>
+                    <form action="{{ url_for('delete_subject', subject_id=subject.id) }}" method="post" style="display: inline;" onsubmit="return confirm('정말 이 과목을 삭제하시겠습니까? 관련된 모든 학습 콘텐츠가 함께 삭제됩니다.');">
+                        <button type="submit" class="btn btn-delete">삭제</button>
+                    </form>
+                </div>
+            </li>
+            {% else %}
+            <li style="text-align: center;">등록된 과목이 없습니다.</li>
+            {% endfor %}
+        </ul>
+        <a href="{{ url_for('admin_dashboard') }}" class="back-link">관리자 페이지로 돌아가기</a>
+    </div>
+</body>
+</html>
+-->
+{% extends "base.html" %}
+
+{% block title %}과목 관리{% endblock %}
+{% block header_title %}📚 과목 관리{% endblock %}
+
+{% block content %}
+<style>
+    /* 이 페이지에서만 사용하는 스타일 */
+    .section {
+        background-color: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+        border: 1px solid #dee2e6;
+    }
+    .section h3 {
+        margin-top: 0;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid #ced4da;
+        padding-bottom: 0.5rem;
+    }
+    .add-form {
+        display: flex;
+        gap: 10px;
+    }
+    .add-form input[type="text"] {
+        flex-grow: 1;
+        padding: 10px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 1em;
+    }
+    .subject-list {
+        list-style-type: none;
+        padding: 0;
+    }
+    .subject-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        border-bottom: 1px solid #e9ecef;
+    }
+    .subject-item:last-child {
+        border-bottom: none;
+    }
+    .subject-item span {
+        font-weight: 500;
+    }
+    .actions {
+        display: flex;
+        gap: 8px;
+    }
+    .btn {
+        padding: 6px 12px;
+        border: none;
+        border-radius: 5px;
+        color: white;
+        cursor: pointer;
+        text-decoration: none;
+        font-size: 0.9em;
+    }
+    .btn-submit { background-color: #28a745; }
+    .btn-edit { background-color: #007bff; }
+    .btn-delete { background-color: #dc3545; }
+</style>
+
+<div class="section">
+    <h3>새 과목 추가</h3>
+    <form method="post" class="add-form">
+        <input type="text" name="name" placeholder="새 과목 이름 입력..." required>
+        <button type="submit" class="btn btn-submit">추가</button>
+    </form>
+</div>
+
+<div class="section">
+    <h3>등록된 과목 목록</h3>
+    <ul class="subject-list">
+        {% for subject in subjects %}
+        <li class="subject-item">
+            <span>{{ subject.name }}</span>
+            <div class="actions">
+                <a href="{{ url_for('edit_subject', subject_id=subject.id) }}" class="btn btn-edit">수정</a>
+                <form action="{{ url_for('delete_subject', subject_id=subject.id) }}" method="post" style="display: inline;" onsubmit="return confirm('정말 이 과목을 삭제하시겠습니까? 관련된 모든 학습 콘텐츠가 함께 삭제됩니다.');">
+                    <button type="submit" class="btn btn-delete">삭제</button>
+                </form>
+            </div>
+        </li>
+        {% else %}
+        <li style="text-align: center; padding: 1rem;">등록된 과목이 없습니다.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

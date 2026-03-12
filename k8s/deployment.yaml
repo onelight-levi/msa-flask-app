@@ -1,0 +1,169 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deploy-auth
+  namespace: msa-flask
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: auth
+  template:
+    metadata:
+      labels:
+        app: auth
+    spec:
+      containers:
+        - name: auth
+          image: nginx:latest
+          ports:
+            - containerPort: 5000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deploy-board
+  namespace: msa-flask
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: board
+  template:
+    metadata:
+      labels:
+        app: board
+    spec:
+      containers:
+        - name: board
+          image: nginx:latest
+          ports:
+            - containerPort: 5000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deploy-mypage
+  namespace: msa-flask
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mypage
+  template:
+    metadata:
+      labels:
+        app: mypage
+    spec:
+      containers:
+        - name: mypage
+          image: nginx:latest
+          ports:
+            - containerPort: 5000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deploy-study
+  namespace: msa-flask
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: study
+  template:
+    metadata:
+      labels:
+        app: study
+    spec:
+      containers:
+        - name: study
+          image: nginx:latest
+          ports:
+            - containerPort: 5000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deploy-admin
+  namespace: msa-flask
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: admin
+  template:
+    metadata:
+      labels:
+        app: admin
+    spec:
+      containers:
+        - name: admin
+          image: nginx:latest
+          ports:
+            - containerPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-auth
+  namespace: msa-flask
+spec:
+  type: ClusterIP
+  selector:
+    app: auth
+  ports:
+    - port: 80
+      targetPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-board
+  namespace: msa-flask
+spec:
+  type: ClusterIP
+  selector:
+    app: board
+  ports:
+    - port: 80
+      targetPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-mypage
+  namespace: msa-flask
+spec:
+  type: ClusterIP
+  selector:
+    app: mypage
+  ports:
+    - port: 80
+      targetPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-study
+  namespace: msa-flask
+spec:
+  type: ClusterIP
+  selector:
+    app: study
+  ports:
+    - port: 80
+      targetPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-admin
+  namespace: msa-flask
+spec:
+  type: ClusterIP
+  selector:
+    app: admin
+  ports:
+    - port: 80
+      targetPort: 5000
