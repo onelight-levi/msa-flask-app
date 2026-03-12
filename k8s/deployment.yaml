@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: auth
-          image: onelight01/svc-auth:ea86cd369f139ebda9bbeab5026ddeef1b55af45
+          image: onelight01/svc-auth:a9e570a7f45934bc7b0a8bd48fd67b8239240a08
           ports:
             - containerPort: 5000
 ---
@@ -34,7 +34,7 @@ spec:
     spec:
       containers:
         - name: board
-          image: onelight01/svc-board:ea86cd369f139ebda9bbeab5026ddeef1b55af45
+          image: onelight01/svc-board:a9e570a7f45934bc7b0a8bd48fd67b8239240a08
           ports:
             - containerPort: 5000
 ---
@@ -54,7 +54,7 @@ spec:
     spec:
       containers:
         - name: mypage
-          image: onelight01/svc-mypage:ea86cd369f139ebda9bbeab5026ddeef1b55af45
+          image: onelight01/svc-mypage:a9e570a7f45934bc7b0a8bd48fd67b8239240a08
           ports:
             - containerPort: 5000
 ---
@@ -74,7 +74,7 @@ spec:
     spec:
       containers:
         - name: study
-          image: onelight01/svc-study:ea86cd369f139ebda9bbeab5026ddeef1b55af45
+          image: onelight01/svc-study:a9e570a7f45934bc7b0a8bd48fd67b8239240a08
           ports:
             - containerPort: 5000
 ---
@@ -94,7 +94,7 @@ spec:
     spec:
       containers:
         - name: admin
-          image: onelight01/svc-admin:ea86cd369f139ebda9bbeab5026ddeef1b55af45
+          image: onelight01/svc-admin:a9e570a7f45934bc7b0a8bd48fd67b8239240a08
           ports:
             - containerPort: 5000
 ---
