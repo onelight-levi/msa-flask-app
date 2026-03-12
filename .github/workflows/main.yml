@@ -42,6 +42,6 @@ jobs:
           sed -i "s|image: onelight01/svc-admin:.*|image: onelight01/svc-admin:${{ github.sha }}|g" ./k8s/deployment.yaml
           git config --global user.email "bot@github.com"
           git config --global user.name "github-actions[bot]"
-          git add deployment.yaml
+          git add ./k8s/deployment.yaml
           git commit -m "chore: update image tag to ${{ github.sha }} [skip ci]"
           git push
