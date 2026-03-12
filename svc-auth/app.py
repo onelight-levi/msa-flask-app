@@ -3,17 +3,19 @@ import re
 from datetime import datetime, timedelta
 import calendar
 from dotenv import load_dotenv, find_dotenv
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify,send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, send_from_directory
 from werkzeug.security import generate_password_hash, check_password_hash
 import pymysql.cursors
 import uuid
 from werkzeug.utils import secure_filename
 
+# .env 로드
 dotenv_path = find_dotenv('/var/www/html/your_flask_app/.env')
 if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path)
 
 app = Flask(__name__)
+app.secret_key = os.getenv('SECRET_KEY', 'default_secret_key') # 세션 사용을 위해 필요
 
 @app.route('/')
 def index():
@@ -44,6 +46,7 @@ def register():
     try:
         conn = get_db_connection()
         with conn.cursor() as cursor:
+            # 중복 체크
             cursor.execute("SELECT id FROM users WHERE username = %s", (username,))
             if cursor.fetchone():
                 flash('이미 존재하는 사용자 이름입니다.', 'error')
@@ -54,6 +57,7 @@ def register():
                 flash('이미 등록된 휴대폰 번호입니다.', 'error')
                 return redirect(url_for('index'))
 
+            # 회원가입 처리
             sql = "INSERT INTO users (username, phone_number, password) VALUES (%s, %s, %s)"
             cursor.execute(sql, (username, phone_number, hashed_password))
         conn.commit()
@@ -65,7 +69,7 @@ def register():
             conn.close()
     return redirect(url_for('index'))
 
-    @app.route('/login', methods=['POST'])
+@app.route('/login', methods=['POST']) # 들여쓰기 수정됨
 def login():
     username = request.form['username'].strip()
     password = request.form['password'].strip()
